@@ -27,13 +27,14 @@ const issues = [
 
   app.get('/api/issues', (req, res) => {
       const metadata = { total_count: issues.length}
-      res.json({_metadata: metadata, records: issues})
-    /*   console.log("URL", req.url)
+      /* console.log("URL", req.url)
       console.log("BODY", req.body)
       console.log("query", req.query)
       console.log("baseUrl", req.baseUrl)
       console.log("originalUrl", req.originalUrl)
       console.log("parameters", req.params) */
+      res.json({_metadata: metadata, records: issues})
+      
   })
 
 app.listen(3000, function(){
