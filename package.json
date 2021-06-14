@@ -1,0 +1,25 @@
+{
+  "name": "pro-mern-stack",
+  "version": "1.0.0",
+  "description": "An issue report app",
+  "main": "index.js",
+  "scripts": {
+    "compile": "babel  static/src --presets react --out-dir static",
+    "watch": "babel static/src --presets react --out-dir static --watch",
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node app.js"
+  },
+  "author": "Solomon Asiedu",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.17.1",
+    "mongodb": "^3.6.9"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.14.3",
+    "@babel/preset-env": "^7.14.4",
+    "babel-cli": "^6.26.0",
+    "babel-preset-react": "^6.24.1",
+    "mongodb": "^3.6.9"
+  }
+}
