@@ -1,5 +1,4 @@
 var contentNode = document.getElementById("contents");
-
 /* const issues = [
   {
     id: 1,
@@ -81,37 +80,39 @@ key={issue.id} issue={issue} />);
   );
 } */
 class IssueAdd extends React.Component {
-  constructor(){
-    super()
-    this.handleSubmit = this.handleSubmit.bind(this)
+  constructor() {
+    super();
+    this.handleSubmit = this.handleSubmit.bind(this);
   }
-  handleSubmit(e){
-    e.preventDefault()
+  handleSubmit(e) {
+    e.preventDefault();
     var form = document.forms.issueAdd;
     this.props.createIssue({
       owner: form.owner.value,
       title: form.title.value,
-      status: 'New',
-      created: new Date()
-    })
-    form.owner.value = ""
-    form.title.value = ""
+      status: "New",
+      created: new Date(),
+    });
+    form.owner.value = "";
+    form.title.value = "";
   }
   render() {
-    return <div>
-      <form name="issueAdd" onSubmit={this.handleSubmit}>
-        <input type="text" name="owner" placeholder="Owner" />
-        <input type="text" name="title" placeholder="Title" />
-        <button>Add</button>
-      </form>
-    </div>;
+    return (
+      <div>
+        <form name="issueAdd" onSubmit={this.handleSubmit}>
+          <input type="text" name="owner" placeholder="Owner" />
+          <input type="text" name="title" placeholder="Title" />
+          <button>Add</button>
+        </form>
+      </div>
+    );
   }
 }
 class IssueRow extends React.Component {
   render() {
     const borderStyle = { border: "1px solid silver", padding: 4 };
     const issue = this.props.issue;
-    console.log('something')
+    console.log("something");
     return (
       <tr>
         <td style={borderStyle}>{issue.id}</td>
@@ -159,38 +160,66 @@ class IssueList extends React.Component {
       issues: [],
     };
     // this.createTestIssue = this.createTestIssue.bind(this)
-    this.createIssue = this.createIssue.bind(this)
+    this.createIssue = this.createIssue.bind(this);
     // setTimeout(() => {this.createTestIssue()}, 2000);
     // setTimeout(this.createTestIssue, 2000);
   }
-  componentDidMount(){
-    this.loadData()
+  componentDidMount() {
+    this.loadData();
   }
-  loadData(){
+  loadData() {
     // setTimeout(() => {
     //   this.setState({
     //     issues: issues
     //   })
     // }, 500)
-    fetch("http://localhost:3000/api/issues").then(response => response.json)
-    .then(data => {
-      console.log("The total count of records is: " + data._metadata.total_count)
-      data.records.forEach( issue => {     
-        issue.created = new Date(issue.created)
-        if(issue.completionDate){
-          issue.completionDate = new Date(issue.completionDate)
-        }
+
+    fetch("http://localhost:3000/api/issues")
+      .then((response) => response.json())
+      .then((data) => {
+        console.log("Total count of records:", data._metadata.total_count);
+        data.records.forEach((issue) => {
+          issue.created = new Date(issue.created);
+          if (issue.completionDate)
+            issue.completionDate = new Date(issue.completionDate);
+        });
+        this.setState({ issues: data.records });
       })
-      this.setState({issues: data.records})
-    }).catch(err => {
-      console.log(err)
-    })
+      .catch((err) => {
+        console.log(err);
+      });
   }
   createIssue(newIssue) {
-    const newIssues = this.state.issues.slice();
-    newIssue.id = this.state.issues.length + 1;
-    newIssues.push(newIssue);
-    this.setState({ issues: newIssues });
+    // const newIssues = this.state.issues.slice();
+    // newIssue.id = this.state.issues.length + 1;
+    // newIssues.push(newIssue);
+    // this.setState({ issues: newIssues });
+
+    fetch("http://localhost:3000/api/issues", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(newIssue),
+    })
+      .then((response) => {
+        if (response.ok) {
+          response.json().then((updatedIssue) => {
+            updatedIssue.created = new Date(updatedIssue.created);
+            if (updatedIssue.completionDate)
+              updatedIssue.completionDate = new Date(
+                updatedIssue.completionDate
+              );
+            const newIssues = this.state.issues.concat(updatedIssue);
+            this.setState({ issues: newIssues });
+          });
+        } else {
+          response.json().then((error) => {
+            alert("Failed to add issue: " + error.message);
+          });
+        }
+      })
+      .catch((err) => {
+        alert("Error in sending the data to the server: " + err.message);
+      });
   }
   // createTestIssue() {
   //   this.createIssue({
@@ -211,7 +240,7 @@ class IssueList extends React.Component {
         {/* <button onClick={this.createTestIssue}>Add</button> */}
         <hr />
         <BorderWrap>
-          <IssueAdd createIssue={this.createIssue}/>
+          <IssueAdd createIssue={this.createIssue} />
         </BorderWrap>
       </div>
     );

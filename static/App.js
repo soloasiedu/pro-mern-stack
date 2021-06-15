@@ -1,22 +1,24 @@
 var contentNode = document.getElementById("contents");
-
-const issues = [{
-  id: 1,
-  status: "Open",
-  owner: "Ravan",
-  created: new Date("2016-08-15"),
-  effort: 5,
-  completionDate: undefined,
-  title: "Error in console when clicking Add"
-}, {
-  id: 2,
-  status: "Assigned",
-  owner: "Eddie",
-  created: new Date("2016-08-16"),
-  effort: 14,
-  completionDate: new Date("2016-08-30"),
-  title: "Missing bottom border on panel"
-}];
+/* const issues = [
+  {
+    id: 1,
+    status: "Open",
+    owner: "Ravan",
+    created: new Date("2016-08-15"),
+    effort: 5,
+    completionDate: undefined,
+    title: "Error in console when clicking Add",
+  },
+  {
+    id: 2,
+    status: "Assigned",
+    owner: "Eddie",
+    created: new Date("2016-08-16"),
+    effort: 14,
+    completionDate: new Date("2016-08-30"),
+    title: "Missing bottom border on panel",
+  },
+]; */
 
 class IssueFilter extends React.Component {
   render() {
@@ -117,7 +119,7 @@ class IssueAdd extends React.Component {
     this.props.createIssue({
       owner: form.owner.value,
       title: form.title.value,
-      status: 'New',
+      status: "New",
       created: new Date()
     });
     form.owner.value = "";
@@ -145,7 +147,7 @@ class IssueRow extends React.Component {
   render() {
     const borderStyle = { border: "1px solid silver", padding: 4 };
     const issue = this.props.issue;
-    console.log('something');
+    console.log("something");
     return React.createElement(
       "tr",
       null,
@@ -231,17 +233,49 @@ class IssueList extends React.Component {
     this.loadData();
   }
   loadData() {
-    setTimeout(() => {
-      this.setState({
-        issues: issues
+    // setTimeout(() => {
+    //   this.setState({
+    //     issues: issues
+    //   })
+    // }, 500)
+
+    fetch("http://localhost:3000/api/issues").then(response => response.json()).then(data => {
+      console.log("Total count of records:", data._metadata.total_count);
+      data.records.forEach(issue => {
+        issue.created = new Date(issue.created);
+        if (issue.completionDate) issue.completionDate = new Date(issue.completionDate);
       });
-    }, 500);
+      this.setState({ issues: data.records });
+    }).catch(err => {
+      console.log(err);
+    });
   }
   createIssue(newIssue) {
-    const newIssues = this.state.issues.slice();
-    newIssue.id = this.state.issues.length + 1;
-    newIssues.push(newIssue);
-    this.setState({ issues: newIssues });
+    // const newIssues = this.state.issues.slice();
+    // newIssue.id = this.state.issues.length + 1;
+    // newIssues.push(newIssue);
+    // this.setState({ issues: newIssues });
+
+    fetch("http://localhost:3000/api/issues", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(newIssue)
+    }).then(response => {
+      if (response.ok) {
+        response.json().then(updatedIssue => {
+          updatedIssue.created = new Date(updatedIssue.created);
+          if (updatedIssue.completionDate) updatedIssue.completionDate = new Date(updatedIssue.completionDate);
+          const newIssues = this.state.issues.concat(updatedIssue);
+          this.setState({ issues: newIssues });
+        });
+      } else {
+        response.json().then(error => {
+          alert("Failed to add issue: " + error.message);
+        });
+      }
+    }).catch(err => {
+      alert("Error in sending the data to the server: " + err.message);
+    });
   }
   // createTestIssue() {
   //   this.createIssue({
