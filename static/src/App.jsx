@@ -175,16 +175,23 @@ class IssueList extends React.Component {
     // }, 500)
 
     fetch("http://localhost:3000/api/issues")
-      .then((response) => response.json())
-      .then((data) => {
-        console.log("Total count of records:", data._metadata.total_count);
-        data.records.forEach((issue) => {
-          issue.created = new Date(issue.created);
-          if (issue.completionDate)
-            issue.completionDate = new Date(issue.completionDate);
-        });
-        this.setState({ issues: data.records });
-      })
+      .then((response) => {
+        if(response.ok){
+          response.json().then((data) => {
+            console.log("Total count of records:", data._metadata.total_count);
+            data.records.forEach((issue) => {
+              issue.created = new Date(issue.created);
+              if (issue.completionDate)
+                issue.completionDate = new Date(issue.completionDate);
+            });
+            this.setState({ issues: data.records });
+          })
+        }else{
+          response.json().then(error => {
+            alert("Failed to fetch issues:" + error.message)
+          })
+        }
+      }) 
       .catch((err) => {
         console.log(err);
       });

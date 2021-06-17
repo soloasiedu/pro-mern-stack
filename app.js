@@ -4,6 +4,8 @@ const app = express();
 app.use(express.static("static"));
 app.use(express.json());
 
+const MongoClient = require("mongodb").MongoClient;
+
 const issues = [
   {
     id: 1,
@@ -61,15 +63,30 @@ function validateIssue(issue) {
   return null;
 }
 
+let db;
+MongoClient.connect("mongodb://localhost:27017/issuetracker")
+  .then((connection) => {
+    db = connection;
+    app.listen(3000, function () {
+      console.log("App started on port 3000");
+    });
+  })
+  .catch((error) => {
+    console.log("ERROR: ", error);
+  });
+
 app.get("/api/issues", (req, res) => {
-  const metadata = { total_count: issues.length };
-  /* console.log("URL", req.url)
-      console.log("BODY", req.body)
-      console.log("query", req.query)
-      console.log("baseUrl", req.baseUrl)
-      console.log("originalUrl", req.originalUrl)
-      console.log("parameters", req.params) */
-  res.json({ _metadata: metadata, records: issues });
+  db.collection("issues")
+    .find()
+    .toArray()
+    .then((issues) => {
+      const metadata = { total_count: issues.length };
+      res.json({ _metadata: metadata, records: issues });
+    })
+    .catch((error) => {
+      console.log(error);
+      res.status(500).json({ message: `Internal Server Error: ${error}` });
+    });
 });
 
 app.post("/api/issues", (req, res) => {
@@ -87,8 +104,4 @@ app.post("/api/issues", (req, res) => {
   issues.push(newIssue);
   res.json(newIssue);
   console.log("BODY", req.body);
-});
-
-app.listen(3000, function () {
-  console.log("App started on port 3000");
 });
