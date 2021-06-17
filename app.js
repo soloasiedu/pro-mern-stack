@@ -37,7 +37,7 @@ const validIssueStatus = {
 };
 
 const issueFieldType = {
-  id: "required",
+  // id: "required",
   status: "required",
   owner: "required",
   effort: "optional",
@@ -91,7 +91,7 @@ app.get("/api/issues", (req, res) => {
 
 app.post("/api/issues", (req, res) => {
   const newIssue = req.body;
-  newIssue.id = issues.length + 1;
+  // newIssue.id = issues.length + 1;
   newIssue.created = new Date();
   if (!newIssue.status) {
     newIssue.status = "New";
@@ -101,7 +101,15 @@ app.post("/api/issues", (req, res) => {
     res.status(422).json({ message: `Invalid request: ${err}` });
     return;
   }
-  issues.push(newIssue);
+  db.collection('issues').insertOne(newIssue).then(result =>
+    db.collection('issues').find({ _id: result.insertedId }).limit(1).next()
+  ).then(newIssue => {
+    res.json(newIssue);
+  }).catch(error => {
+    console.log(error);
+    res.status(500).json({ message: `Internal Server Error: ${error}` });
+  });
+  /* issues.push(newIssue);
   res.json(newIssue);
-  console.log("BODY", req.body);
+  console.log("BODY", req.body); */
 });

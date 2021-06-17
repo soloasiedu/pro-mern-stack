@@ -28,7 +28,7 @@ class IssueFilter extends React.Component {
 class IssueTable extends React.Component {
   render() {
     const issueRows = this.props.issues.map((issue) => (
-      <IssueRow key={issue.id} issue={issue} />
+      <IssueRow key={issue._id} issue={issue} />
     ));
 
     const borderStyle = { border: "1px solid silver", padding: 6 };
@@ -108,7 +108,7 @@ class IssueAdd extends React.Component {
     );
   }
 }
-class IssueRow extends React.Component {
+/* class IssueRow extends React.Component {
   render() {
     const borderStyle = { border: "1px solid silver", padding: 4 };
     const issue = this.props.issue;
@@ -127,26 +127,29 @@ class IssueRow extends React.Component {
       </tr>
     );
   }
-}
-/* const IssueRow = (props) => (
+} */
+const IssueRow = (props) => (
   <tr>
-    <td>{props.issue.id}</td>
+    <td>{props.issue._id}</td>
     <td>{props.issue.status}</td>
     <td>{props.issue.owner}</td>
     <td>{props.issue.created.toDateString()}</td>
     <td>{props.issue.effort}</td>
-    <td>{props.issue.completionDate ?
-props.issue.completionDate.toDateString() : ''}</td>
+    <td>
+      {props.issue.completionDate
+        ? props.issue.completionDate.toDateString()
+        : ""}
+    </td>
     <td>{props.issue.title}</td>
   </tr>
-) */
-IssueRow.propTypes = {
-  id: React.PropTypes.number.isRequired,
-  title: React.PropTypes.string,
-};
-IssueRow.defaultProps = {
-  issue_title: "--- No title ---",
-};
+);
+// IssueRow.propTypes = {
+//   id: React.PropTypes.number.isRequired,
+//   title: React.PropTypes.string,
+// };
+// IssueRow.defaultProps = {
+//   issue_title: "--- No title ---",
+// };
 class BorderWrap extends React.Component {
   render() {
     const borderedStyle = { border: "1px solid silver", padding: 6 };
@@ -176,7 +179,7 @@ class IssueList extends React.Component {
 
     fetch("http://localhost:3000/api/issues")
       .then((response) => {
-        if(response.ok){
+        if (response.ok) {
           response.json().then((data) => {
             console.log("Total count of records:", data._metadata.total_count);
             data.records.forEach((issue) => {
@@ -185,13 +188,13 @@ class IssueList extends React.Component {
                 issue.completionDate = new Date(issue.completionDate);
             });
             this.setState({ issues: data.records });
-          })
-        }else{
-          response.json().then(error => {
-            alert("Failed to fetch issues:" + error.message)
-          })
+          });
+        } else {
+          response.json().then((error) => {
+            alert("Failed to fetch issues:" + error.message);
+          });
         }
-      }) 
+      })
       .catch((err) => {
         console.log(err);
       });
